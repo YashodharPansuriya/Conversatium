@@ -8,6 +8,8 @@ let socket;
 const Chat = () => {
     const [name, setName] = useState('');
     const [room, setRoom] = useState('');
+    const [message, setMessage] = useState('');
+    const [messages, setMessages] = useState([]);
 
     const ENDPOINT = 'localhost:5000';
 
@@ -26,6 +28,12 @@ const Chat = () => {
             socket.off();
         }
     }, [ENDPOINT, location.search])
+
+    useEffect(() => {
+        socket.on('message', (message) => {
+            setMessages([...message, message]);
+        })
+    }, [messages])
 }
 
 const chat = () => {
