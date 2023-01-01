@@ -2,6 +2,7 @@ const express = require('express');
 const socketio = require('socket.io');
 const http = require('http');
 const router = require('./router');
+const cors = require('cors');
 const { addUser, removeUser, getUsers, getUsersInRoom } = require('./users');
 
 const PORT = process.env.PORT || 5000
@@ -11,21 +12,22 @@ const server = http.createServer(app);
 const io = socketio(server);
 
 app.use(router);
+app.use(cors());
 
-io.on('connection', (socket) => {
+io.on('connect', (socket) => {
 
   socket.on('join', ({ name, room }, callback) => {
-    const { user, error } = addUser({ id: socket.id, name, room });
+    const { error, user } = addUser({ id: socket.id, name, room });
 
     if (error) {
       return callback(error);
     }
 
+    socket.join(user.room);
+
     //Admin generated Message ---- emit event from frontend to backend 
     socket.emit('message', { user: 'admin', text: `${user.name}, welcome to the room ${user.room}` });
     socket.broadcast.to(user.room).emit('message', { user: 'admin', text: `${user.name}, has joined ${user.room}!!` })
-
-    socket.join(user.room);
 
     callback();
   });
