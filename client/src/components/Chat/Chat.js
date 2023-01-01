@@ -65,4 +65,4 @@ const Chat = ({ location }) => {
     )
 }
 
-export default chat;
+export default Chat;
